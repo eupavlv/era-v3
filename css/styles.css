@@ -45,8 +45,7 @@
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; scrollbar-width: none; -ms-overflow-style: none; }
-html::-webkit-scrollbar { width: 0; height: 0; display: none; }   /* скроллбар скрыт визуально, скролл работает */
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
   font-family: var(--ff);
   background: var(--c-bg);
@@ -202,9 +201,12 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   line-height: 1;
   letter-spacing: -.01em;
   color: #fff;
-  transition: opacity .2s;
+  text-decoration: underline transparent;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 6px;
+  transition: text-decoration-color .2s, opacity .2s;
 }
-.nav__link:hover { opacity: .7; }
+.nav__link:hover { text-decoration-color: rgba(255,255,255,.45); }
 
 .header__cta {
   flex-shrink: 0;
@@ -996,7 +998,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
    ============================================================ */
 
 /* Активный пункт меню */
-.nav__link.is-active { opacity: 1; color: #dcd5c8; }
+.nav__link.is-active { opacity: 1; color: #fff; font-weight: 500; text-decoration-color: #fff; }
 
 /* ---------- Page hero (тёмный, под белым хедером) ---------- */
 .page-hero {
@@ -1176,27 +1178,80 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* ---------- Статусы партнёра ---------- */
 /* Система статусов — восходящая «лестница роста» */
-.pp-statuses { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 28px; align-items: end; }
-.pp-status {
-  display: flex; flex-direction: column;
-  padding: 24px 22px; border-radius: 8px;
-  background: #fff; border: 1px solid var(--c-line);
+/* Система статусов — кривая роста через 5 колонок (по Figma 3120:54) */
+.pp-curve {
+  position: relative;
+  aspect-ratio: 1707 / 391;
+  min-height: 280px;
+  margin-bottom: 28px;
 }
-.pp-status--1 { min-height: 170px; }
-.pp-status--2 { min-height: 205px; }
-.pp-status--3 { min-height: 240px; }
-.pp-status--4 { min-height: 275px; }
-.pp-status--5 { min-height: 310px; background: var(--c-dark); border-color: var(--c-dark); }
-.pp-status__bar { height: 4px; border-radius: 4px; background: var(--c-accent); }
-.pp-status__num { margin-top: auto; font-size: 14px; letter-spacing: .04em; color: rgba(22,22,22,.35); margin-bottom: 10px; }
-.pp-status__name { font-size: 18px; font-weight: 500; line-height: 1.2; letter-spacing: -.01em; color: #161616; }
-.pp-status--1 .pp-status__bar { background: #e4ddcf; }
-.pp-status--2 .pp-status__bar { background: #d2c39f; }
-.pp-status--3 .pp-status__bar { background: #c2ad7f; }
-.pp-status--4 .pp-status__bar { background: var(--c-sand-2); }
-.pp-status--5 .pp-status__bar { background: var(--c-sand-1); }
-.pp-status--5 .pp-status__num { color: rgba(255,255,255,.5); }
-.pp-status--5 .pp-status__name { color: #fff; }
+.pp-curve__svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.pp-curve__item { position: static; }
+.pp-curve__dot {
+  position: absolute; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--c-bg); border: 2px solid #a98f5e;
+  left: var(--dx); top: var(--dy);
+  transform: translate(-50%, -50%); z-index: 2;
+}
+.pp-curve__label {
+  position: absolute; left: var(--lx); top: 72.4%;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.pp-curve__num { font-size: 14px; letter-spacing: .02em; color: rgba(0,0,0,.34); }
+.pp-curve__name { font-size: clamp(16px, 1.4vw, 22px); font-weight: 500; line-height: 1.2; color: #000; white-space: nowrap; }
+
+/* Планшет: компактная кривая, имена переносятся */
+@media (max-width: 1100px) and (min-width: 768px) {
+  .pp-curve {
+    aspect-ratio: auto;
+    min-height: 0;
+    height: 320px;
+  }
+  .pp-curve__name {
+    white-space: normal;
+    font-size: 14px;
+    max-width: 92%;
+  }
+  .pp-curve__num { font-size: 12px; }
+}
+
+/* Мобилка: вертикальный timeline, золотая линия проходит сквозь центры точек */
+@media (max-width: 767.98px) {
+  .pp-curve {
+    aspect-ratio: auto;
+    min-height: 0;
+    height: auto;
+    padding-left: 36px;
+  }
+  .pp-curve__svg { display: none; }
+  .pp-curve::before {
+    content: ""; position: absolute;
+    left: 18px; top: 20px; bottom: 20px;
+    width: 2px;
+    background: #a98f5e;
+  }
+  .pp-curve__item {
+    position: relative;
+    display: block;
+    padding: 18px 0;
+  }
+  .pp-curve__dot {
+    transform: none;
+    background: var(--c-bg);
+    border-color: #a98f5e;
+  }
+  /* Центры всех точек на x = 19px от .pp-curve (line center) → left = -17 - W/2 от item */
+  .pp-curve__item:nth-of-type(1) .pp-curve__dot { width: 12px; height: 12px; left: -23px; top: 26px; }
+  .pp-curve__item:nth-of-type(2) .pp-curve__dot { width: 14px; height: 14px; left: -24px; top: 25px; }
+  .pp-curve__item:nth-of-type(3) .pp-curve__dot { width: 16px; height: 16px; left: -25px; top: 24px; }
+  .pp-curve__item:nth-of-type(4) .pp-curve__dot { width: 18px; height: 18px; left: -26px; top: 23px; }
+  .pp-curve__item:nth-of-type(5) .pp-curve__dot { width: 20px; height: 20px; left: -27px; top: 22px; background: #a98f5e; }
+  .pp-curve__label {
+    position: static;
+  }
+  .pp-curve__num { font-size: 15px; }
+  .pp-curve__name { white-space: normal; font-size: 21px; line-height: 1.25; }
+}
 .pp-statuses-note { font-size: 14px; font-weight: 300; line-height: 1.4; color: rgba(22,22,22,.45); margin-bottom: 24px; }
 
 /* ---------- Как стать партнёром ---------- */
@@ -1217,10 +1272,16 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .pp-notice {
   position: relative; background: #fff; border-radius: 6px;
   padding: 30px 30px 30px 34px; box-shadow: 0 12px 36px -24px rgba(22,19,15,.08);
+  display: flex; align-items: center; gap: 32px;
 }
 .pp-notice::before { content: ""; position: absolute; left: 0; top: 18px; bottom: 18px; width: 3px; border-radius: 3px; background: var(--c-sand-1); }
+.pp-notice__body { flex: 1; min-width: 0; }
 .pp-notice__label { font-size: 13px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; color: var(--c-sand-2); margin-bottom: 12px; }
-.pp-notice__text { font-size: 16px; font-weight: 300; line-height: 1.5; letter-spacing: -.01em; color: rgba(22,22,22,.7); max-width: 920px; }
+.pp-notice__text { font-size: 16px; font-weight: 300; line-height: 1.5; letter-spacing: -.01em; color: rgba(22,22,22,.7); max-width: 760px; }
+.pp-notice__cta { flex-shrink: 0; }
+@media (max-width: 767.98px) {
+  .pp-notice { flex-direction: column; align-items: flex-start; gap: 20px; }
+}
 
 /* ---------- Официальные партнёры ---------- */
 .pp-partners { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
@@ -1437,8 +1498,10 @@ img.pp-partner__photo { object-fit: cover; object-position: center top; border: 
 }
 .rp-grid--reverse .rp-info { order: 2; }
 .rp-grid--reverse .rp-mock { order: 1; }
+.rp-grid--solo { grid-template-columns: 1fr; }
 .rp-info { display: flex; flex-direction: column; }
 .rp-mock { display: flex; align-items: flex-start; justify-content: center; }
+.rp-mock--full img { width: 100%; height: auto; display: block; }
 
 /* meta-сетка 2×2 */
 .rp-meta {
@@ -1610,11 +1673,10 @@ img.pp-partner__photo { object-fit: cover; object-position: center top; border: 
 .cf-result p { font-size: 15px; font-weight: 300; line-height: 1.5; letter-spacing: -.01em; color: rgba(22,22,22,.55); }
 
 /* Программа — уровни */
-#results { padding-bottom: 100px; }   /* отступ серой секции перед белым блоком «Программа» */
-#program { background: #fff; padding-bottom: 100px; }   /* чистый белый фон секции + отступ снизу, чтобы не сливался со следующей */
+#results { padding-bottom: 100px; }
+#program { padding-bottom: 100px; }   /* фон унаследован от section--light (var(--c-bg)) — как у #results */
 .cf-program-lead { font-size: 18px; font-weight: 300; line-height: 1.5; letter-spacing: -.01em; color: rgba(22,22,22,.55); max-width: 880px; margin-bottom: 48px; }
-
-.cf-levels { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; align-items: start; }
+.cf-levels { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; align-items: stretch; }
 .cf-level {
   position: relative; display: flex; flex-direction: column;
   padding: 40px; border-radius: 14px;
@@ -1627,6 +1689,7 @@ img.pp-partner__photo { object-fit: cover; object-position: center top; border: 
   background: var(--c-sand-1); color: #161616;
   font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
 }
+.cf-level__badge--base { background: rgba(22,19,15,.08); color: var(--c-ink-2); }
 
 .cf-level__head { padding-bottom: 26px; margin-bottom: 26px; border-bottom: 1px solid var(--c-line); }
 .cf-level--featured .cf-level__head { border-bottom-color: rgba(255,255,255,.14); }
@@ -1789,6 +1852,10 @@ img.pp-partner__photo { object-fit: cover; object-position: center top; border: 
 .mt-table tbody tr:first-child td:first-child::before { top: 41px; }
 .mt-table tbody tr:nth-child(3n+2) td:first-child::before { background: #98A7D5; }
 .mt-table tbody tr:nth-child(3n) td:first-child::before { background: #C2B79F; }
+/* Однотонные буллеты по блокам опросников */
+#hexaco .mt-table tbody tr td:first-child::before { background: #95BD99; }
+#destructors .mt-table tbody tr td:first-child::before { background: #C2B79F; }
+#motivation .mt-table tbody tr td:first-child::before { background: #98A7D5; }
 
 /* Таблица α-Кронбаха */
 .mt-alpha { width: 100%; border-collapse: collapse; max-width: 920px; margin-top: 24px; }
@@ -1933,8 +2000,7 @@ img.pp-partner__photo { object-fit: cover; object-position: center top; border: 
 
   /* Partners page */
   .pp-benefits { grid-template-columns: repeat(2, 1fr); }
-  .pp-statuses { grid-template-columns: repeat(3, 1fr); align-items: stretch; }
-  .pp-status { min-height: 160px; }
+  .pp-curve__name { white-space: normal; }
   .pp-partners { grid-template-columns: repeat(2, 1fr); }
   .pp-final__inner { grid-template-columns: 1fr; gap: 32px; }
 
@@ -2027,7 +2093,7 @@ img.pp-partner__photo { object-fit: cover; object-position: center top; border: 
   /* Partners page */
   .pp-benefits { grid-template-columns: 1fr; }
   .pp-steps { grid-template-columns: 1fr; }
-  .pp-statuses { grid-template-columns: repeat(2, 1fr); }
+  .pp-curve__name { font-size: 15px; }
   .pp-final__title { font-size: clamp(24px, 6vw, 32px); }
 
   /* Experts page */
@@ -2092,9 +2158,7 @@ img.pp-partner__photo { object-fit: cover; object-position: center top; border: 
   .cp-cta__actions { width: 100%; }
 
   /* Partners page */
-  .pp-statuses { grid-template-columns: 1fr; }
   .pp-partners { grid-template-columns: 1fr; }
-  .pp-status { min-height: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
