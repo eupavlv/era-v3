@@ -111,4 +111,37 @@
       }
     });
   }
+
+  /* --- Cookie-плашка --- */
+  var COOKIE_KEY = 'era-cookie-accepted';
+  if (!localStorage.getItem(COOKIE_KEY)) {
+    setTimeout(function () {
+      var banner = document.createElement('aside');
+      banner.className = 'cookie-banner';
+      banner.setAttribute('role', 'region');
+      banner.setAttribute('aria-label', 'Уведомление о cookie');
+      banner.innerHTML =
+        '<div class="cookie-banner__inner">' +
+          '<p class="cookie-banner__text">' +
+            'Мы обрабатываем файлы ' +
+            '<a href="https://expertise.bitobe.ru/soglasheniya/cookie.pdf" target="_blank" rel="noopener" class="cookie-banner__link">cookie</a>' +
+            ' (некоторые данные передаются в сервис интернет-статистики Яндекс Метрика). ' +
+            'Вы можете запретить обработку cookies в настройках браузера.' +
+          '</p>' +
+          '<button type="button" class="cookie-banner__close" aria-label="Закрыть уведомление">OK</button>' +
+        '</div>';
+      document.body.appendChild(banner);
+      // двойной rAF — даём браузеру отрисовать начальное состояние перед transition
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { banner.classList.add('is-visible'); });
+      });
+      banner.querySelector('.cookie-banner__close').addEventListener('click', function () {
+        localStorage.setItem(COOKIE_KEY, '1');
+        banner.classList.remove('is-visible');
+        setTimeout(function () {
+          if (banner.parentNode) banner.parentNode.removeChild(banner);
+        }, 400);
+      });
+    }, 2500);
+  }
 })();
