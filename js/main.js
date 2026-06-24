@@ -124,7 +124,7 @@
         '<div class="cookie-banner__inner">' +
           '<p class="cookie-banner__text">' +
             'Мы обрабатываем файлы ' +
-            '<a href="https://expertise.bitobe.ru/soglasheniya/cookie.pdf" target="_blank" rel="noopener" class="cookie-banner__link">cookie</a>' +
+            '<a href="https://media.era-lider.ru/dokumentatsiya/cookie.pdf" target="_blank" rel="noopener" class="cookie-banner__link">cookie</a>' +
             ' (некоторые данные передаются в сервис интернет-статистики Яндекс Метрика). ' +
             'Вы можете запретить обработку cookies в настройках браузера.' +
           '</p>' +
